@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
 import { EventCard, Event } from "@/components/EventCard";
 import { mockEvents } from "@/data/mockEvents";
 import { useToast } from "@/hooks/use-toast";
+import { Link } from "react-router-dom";
+import { Settings, FileText, Users } from "lucide-react";
 
 const Index = () => {
   const [confirmedEvents, setConfirmedEvents] = useState<string[]>([]);
@@ -57,8 +60,26 @@ const Index = () => {
       {/* Header */}
       <div className="bg-gradient-primary text-primary-foreground">
         <div className="container mx-auto px-4 py-8">
-          <h1 className="text-4xl font-bold mb-2">Agenda de Eventos</h1>
-          <p className="text-lg opacity-90">Descubra e confirme presença nos melhores eventos</p>
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Agenda de Eventos</h1>
+              <p className="text-lg opacity-90">Descubra e confirme presença nos melhores eventos</p>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/admin/import">
+                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/20">
+                  <FileText className="w-4 h-4 mr-2" />
+                  Importar CSV
+                </Button>
+              </Link>
+              <Link to="/admin/confirmations">
+                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/20">
+                  <Users className="w-4 h-4 mr-2" />
+                  Ver Confirmações
+                </Button>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
 
