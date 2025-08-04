@@ -59,23 +59,25 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex justify-between items-start">
+        <div className="container mx-auto px-4 py-6 lg:py-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Agenda de Eventos</h1>
-              <p className="text-lg opacity-90">Descubra e confirme presença nos melhores eventos</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Agenda de Eventos</h1>
+              <p className="text-sm sm:text-base lg:text-lg opacity-90">Descubra e confirme presença nos melhores eventos</p>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2">
               <Link to="/admin/import">
-                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/20">
+                <Button variant="ghost" size="sm" className="w-full sm:w-auto text-primary-foreground hover:bg-white/20">
                   <FileText className="w-4 h-4 mr-2" />
-                  Importar CSV
+                  <span className="hidden sm:inline">Importar CSV</span>
+                  <span className="sm:hidden">Import</span>
                 </Button>
               </Link>
               <Link to="/admin/confirmations">
-                <Button variant="ghost" size="sm" className="text-primary-foreground hover:bg-white/20">
+                <Button variant="ghost" size="sm" className="w-full sm:w-auto text-primary-foreground hover:bg-white/20">
                   <Users className="w-4 h-4 mr-2" />
-                  Ver Confirmações
+                  <span className="hidden sm:inline">Ver Confirmações</span>
+                  <span className="sm:hidden">Confirmações</span>
                 </Button>
               </Link>
             </div>
@@ -84,14 +86,18 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 py-6 lg:py-8">
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-md mx-auto mb-8">
-            <TabsTrigger value="all" className="text-sm">
-              Todos os Eventos ({mockEvents.length})
+          <TabsList className="grid w-full grid-cols-2 max-w-sm sm:max-w-md mx-auto mb-6 lg:mb-8">
+            <TabsTrigger value="all" className="text-xs sm:text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">Todos os Eventos</span>
+              <span className="sm:hidden">Todos</span>
+              <span className="ml-1">({mockEvents.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="confirmed" className="text-sm">
-              Meus Eventos ({confirmedEventsList.length})
+            <TabsTrigger value="confirmed" className="text-xs sm:text-sm px-2 sm:px-4">
+              <span className="hidden sm:inline">Meus Eventos</span>
+              <span className="sm:hidden">Meus</span>
+              <span className="ml-1">({confirmedEventsList.length})</span>
             </TabsTrigger>
           </TabsList>
           
@@ -101,7 +107,7 @@ const Index = () => {
               <p className="text-muted-foreground">Explore nossa seleção completa de eventos</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
               {mockEvents.map(event => (
                 <EventCard
                   key={event.id}
@@ -126,7 +132,7 @@ const Index = () => {
             </div>
             
             {confirmedEventsList.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
                 {confirmedEventsList.map(event => (
                   <EventCard
                     key={event.id}
