@@ -14,7 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_confirmations: {
+        Row: {
+          confirmed_at: string | null
+          event_id: number
+          id: string
+          session_id: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          event_id: number
+          id?: string
+          session_id: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          event_id?: number
+          id?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_confirmations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          article_code: string | null
+          authors: string | null
+          contact_email: string | null
+          created_at: string
+          current_attendees: number | null
+          date: string | null
+          description: string | null
+          id: number
+          image_url: string | null
+          imageUrl: string | null
+          location: string | null
+          max_attendees: number | null
+          maxAttendees: number | null
+          price: number | null
+          session_name: string | null
+          theme: string | null
+          time: string | null
+          title: string | null
+        }
+        Insert: {
+          article_code?: string | null
+          authors?: string | null
+          contact_email?: string | null
+          created_at?: string
+          current_attendees?: number | null
+          date?: string | null
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          imageUrl?: string | null
+          location?: string | null
+          max_attendees?: number | null
+          maxAttendees?: number | null
+          price?: number | null
+          session_name?: string | null
+          theme?: string | null
+          time?: string | null
+          title?: string | null
+        }
+        Update: {
+          article_code?: string | null
+          authors?: string | null
+          contact_email?: string | null
+          created_at?: string
+          current_attendees?: number | null
+          date?: string | null
+          description?: string | null
+          id?: number
+          image_url?: string | null
+          imageUrl?: string | null
+          location?: string | null
+          max_attendees?: number | null
+          maxAttendees?: number | null
+          price?: number | null
+          session_name?: string | null
+          theme?: string | null
+          time?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
