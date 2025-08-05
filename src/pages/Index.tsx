@@ -59,25 +59,23 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="bg-gradient-primary text-primary-foreground">
-        <div className="container mx-auto px-4 py-6 lg:py-8">
-          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2">Agenda de Eventos</h1>
-              <p className="text-sm sm:text-base lg:text-lg opacity-90">Descubra e confirme presença nos melhores eventos</p>
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
+          <div className="flex flex-col lg:flex-row lg:justify-between lg:items-start gap-3 sm:gap-4">
+            <div className="min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-1 sm:mb-2 leading-tight">Agenda de Eventos</h1>
+              <p className="text-xs sm:text-sm lg:text-lg opacity-90 leading-relaxed">Descubra e confirme presença nos melhores eventos</p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-2">
+            <div className="flex flex-row gap-2 shrink-0">
               <Link to="/admin/import">
-                <Button variant="ghost" size="sm" className="w-full sm:w-auto text-primary-foreground hover:bg-white/20">
-                  <FileText className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Importar CSV</span>
-                  <span className="sm:hidden">Import</span>
+                <Button variant="ghost" size="sm" className="w-auto text-primary-foreground hover:bg-white/20 px-2 sm:px-3">
+                  <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Import</span>
                 </Button>
               </Link>
               <Link to="/admin/confirmations">
-                <Button variant="ghost" size="sm" className="w-full sm:w-auto text-primary-foreground hover:bg-white/20">
-                  <Users className="w-4 h-4 mr-2" />
-                  <span className="hidden sm:inline">Ver Confirmações</span>
-                  <span className="sm:hidden">Confirmações</span>
+                <Button variant="ghost" size="sm" className="w-auto text-primary-foreground hover:bg-white/20 px-2 sm:px-3">
+                  <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                  <span className="text-xs sm:text-sm">Admin</span>
                 </Button>
               </Link>
             </div>
@@ -86,28 +84,28 @@ const Index = () => {
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-6 lg:py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-6 lg:py-8">
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 max-w-sm sm:max-w-md mx-auto mb-6 lg:mb-8">
-            <TabsTrigger value="all" className="text-xs sm:text-sm px-2 sm:px-4">
-              <span className="hidden sm:inline">Todos os Eventos</span>
+          <TabsList className="grid w-full grid-cols-2 max-w-xs sm:max-w-sm mx-auto mb-4 sm:mb-6 lg:mb-8 h-9 sm:h-10">
+            <TabsTrigger value="all" className="text-xs sm:text-sm px-1.5 sm:px-2 lg:px-4">
+              <span className="hidden sm:inline">Todos</span>
               <span className="sm:hidden">Todos</span>
-              <span className="ml-1">({mockEvents.length})</span>
+              <span className="ml-0.5 sm:ml-1">({mockEvents.length})</span>
             </TabsTrigger>
-            <TabsTrigger value="confirmed" className="text-xs sm:text-sm px-2 sm:px-4">
-              <span className="hidden sm:inline">Meus Eventos</span>
+            <TabsTrigger value="confirmed" className="text-xs sm:text-sm px-1.5 sm:px-2 lg:px-4">
+              <span className="hidden sm:inline">Meus</span>
               <span className="sm:hidden">Meus</span>
-              <span className="ml-1">({confirmedEventsList.length})</span>
+              <span className="ml-0.5 sm:ml-1">({confirmedEventsList.length})</span>
             </TabsTrigger>
           </TabsList>
           
-          <TabsContent value="all" className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-foreground mb-2">Todos os Eventos</h2>
-              <p className="text-muted-foreground">Explore nossa seleção completa de eventos</p>
+          <TabsContent value="all" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground mb-1 sm:mb-2">Todos os Eventos</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">Explore nossa seleção completa de eventos</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
               {mockEvents.map(event => (
                 <EventCard
                   key={event.id}
@@ -120,10 +118,10 @@ const Index = () => {
             </div>
           </TabsContent>
           
-          <TabsContent value="confirmed" className="space-y-6">
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-semibold text-foreground mb-2">Meus Eventos</h2>
-              <p className="text-muted-foreground">
+          <TabsContent value="confirmed" className="space-y-4 sm:space-y-6">
+            <div className="text-center mb-4 sm:mb-6">
+              <h2 className="text-lg sm:text-xl lg:text-2xl font-semibold text-foreground mb-1 sm:mb-2">Meus Eventos</h2>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {confirmedEventsList.length > 0 
                   ? "Eventos que você confirmou presença" 
                   : "Você ainda não confirmou presença em nenhum evento"
@@ -132,7 +130,7 @@ const Index = () => {
             </div>
             
             {confirmedEventsList.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {confirmedEventsList.map(event => (
                   <EventCard
                     key={event.id}
@@ -144,12 +142,12 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="w-32 h-32 mx-auto mb-4 bg-muted rounded-full flex items-center justify-center">
-                  <span className="text-4xl">📅</span>
+              <div className="text-center py-8 sm:py-12">
+                <div className="w-24 h-24 sm:w-32 sm:h-32 mx-auto mb-3 sm:mb-4 bg-muted rounded-full flex items-center justify-center">
+                  <span className="text-2xl sm:text-4xl">📅</span>
                 </div>
-                <p className="text-lg text-muted-foreground mb-2">Nenhum evento confirmado</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm sm:text-lg text-muted-foreground mb-1 sm:mb-2">Nenhum evento confirmado</p>
+                <p className="text-xs sm:text-sm text-muted-foreground px-4">
                   Visite a aba "Todos os Eventos" para confirmar sua presença
                 </p>
               </div>
