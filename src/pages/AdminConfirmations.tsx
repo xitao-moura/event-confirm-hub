@@ -29,9 +29,39 @@ const AdminConfirmations = () => {
   const fetchConfirmations = async () => {
     setIsLoading(true);
     try {
-      // TODO: Implementar integração com Supabase
-      // Simulando dados por enquanto
-      setConfirmations([]);
+      const { data, error } = await supabase
+        .from('event_confirmations')
+        .select(`
+          id,
+          session_id,
+          event_id,
+          confirmed_at,
+          events (
+            title,
+            date,
+            time,
+            location,
+            session_name
+          )
+        `)
+        .order('confirmed_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      const formattedConfirmations: Confirmation[] = data.map(item => ({
+        id: item.id,
+        user_session_id: item.session_id,
+        event_id: item.event_id.toString(),
+        confirmed_at: item.confirmed_at,
+        events: {
+          title: item.events?.title || 'Evento não encontrado',
+          date: item.events?.date || '',
+          time: item.events?.time || '',
+          location: item.events?.session_name || item.events?.location || ''
+        }
+      }));
+      
+      setConfirmations(formattedConfirmations);
     } catch (error) {
       console.error('Erro:', error);
       toast({
@@ -46,7 +76,34 @@ const AdminConfirmations = () => {
 
   const deleteConfirmation = async (confirmationId: string) => {
     try {
-      // TODO: Implementar integração com Supabase
+      const confirmation = confirmations.find(c => c.id === confirmationId);
+      if (!confirmation) return;
+      
+      // Deletar confirmação
+      const { error } = await supabase
+        .from('event_confirmations')
+        .delete()
+        .eq('id', confirmationId);
+      
+      if (error) throw error;
+      
+      // Buscar contador atual e atualizar
+      const { data: eventData, error: eventError } = await supabase
+        .from('events')
+        .select('current_attendees')
+        .eq('id', parseInt(confirmation.event_id))
+        .single();
+      
+      if (eventError) throw eventError;
+      
+      const newCount = Math.max(0, (eventData.current_attendees || 0) - 1);
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ current_attendees: newCount })
+        .eq('id', parseInt(confirmation.event_id));
+      
+      if (updateError) throw updateError;
+      
       toast({
         title: "Sucesso",
         description: "Confirmação deletada com sucesso.",

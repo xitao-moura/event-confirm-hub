@@ -2,30 +2,92 @@ import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { EventCard, Event } from "@/components/EventCard";
-import { mockEvents } from "@/data/mockEvents";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Link } from "react-router-dom";
 import { Settings, FileText, Users } from "lucide-react";
 
 const Index = () => {
+  const [events, setEvents] = useState<Event[]>([]);
   const [confirmedEvents, setConfirmedEvents] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Carregar eventos confirmados do localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem('confirmedEvents');
-    if (saved) {
-      setConfirmedEvents(JSON.parse(saved));
+  // Gerar ID de sessão único para o usuário
+  const getSessionId = () => {
+    let sessionId = localStorage.getItem('userSessionId');
+    if (!sessionId) {
+      sessionId = crypto.randomUUID();
+      localStorage.setItem('userSessionId', sessionId);
     }
+    return sessionId;
+  };
+
+  // Carregar eventos do Supabase
+  const fetchEvents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('events')
+        .select('*')
+        .order('date', { ascending: true });
+      
+      if (error) throw error;
+      
+      const formattedEvents: Event[] = data.map(event => ({
+        id: event.id.toString(),
+        title: event.title || '',
+        date: event.date || '',
+        time: event.time || '',
+        location: event.location || '',
+        description: event.description || '',
+        category: event.theme || 'Geral',
+        maxAttendees: event.max_attendees || event.maxAttendees || 0,
+        currentAttendees: event.current_attendees || 0,
+        session_name: event.session_name,
+        theme: event.theme,
+        article_code: event.article_code,
+        authors: event.authors,
+        contact_email: event.contact_email
+      }));
+      
+      setEvents(formattedEvents);
+    } catch (error) {
+      console.error('Erro ao carregar eventos:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar eventos.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Carregar confirmações do usuário
+  const fetchUserConfirmations = async () => {
+    try {
+      const sessionId = getSessionId();
+      const { data, error } = await supabase
+        .from('event_confirmations')
+        .select('event_id')
+        .eq('session_id', sessionId);
+      
+      if (error) throw error;
+      
+      const confirmedIds = data.map(confirmation => confirmation.event_id.toString());
+      setConfirmedEvents(confirmedIds);
+    } catch (error) {
+      console.error('Erro ao carregar confirmações:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEvents();
+    fetchUserConfirmations();
   }, []);
 
-  // Salvar no localStorage sempre que confirmedEvents mudar
-  useEffect(() => {
-    localStorage.setItem('confirmedEvents', JSON.stringify(confirmedEvents));
-  }, [confirmedEvents]);
-
-  const handleConfirmEvent = (eventId: string) => {
-    const event = mockEvents.find(e => e.id === eventId);
+  const handleConfirmEvent = async (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
     if (event && event.currentAttendees >= event.maxAttendees) {
       toast({
         title: "Evento lotado",
@@ -35,23 +97,93 @@ const Index = () => {
       return;
     }
 
-    setConfirmedEvents(prev => [...prev, eventId]);
-    toast({
-      title: "Presença confirmada!",
-      description: `Você confirmou presença no evento: ${event?.title}`,
-    });
+    try {
+      const sessionId = getSessionId();
+      const { error } = await supabase
+        .from('event_confirmations')
+        .insert([{
+          event_id: parseInt(eventId),
+          session_id: sessionId
+        }]);
+      
+      if (error) throw error;
+      
+      // Atualizar contador de participantes
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ current_attendees: (event.currentAttendees + 1) })
+        .eq('id', parseInt(eventId));
+      
+      if (updateError) throw updateError;
+      
+      setConfirmedEvents(prev => [...prev, eventId]);
+      
+      // Atualizar lista de eventos
+      setEvents(prev => prev.map(e => 
+        e.id === eventId 
+          ? { ...e, currentAttendees: e.currentAttendees + 1 }
+          : e
+      ));
+      
+      toast({
+        title: "Presença confirmada!",
+        description: `Você confirmou presença no evento: ${event?.title}`,
+      });
+    } catch (error) {
+      console.error('Erro ao confirmar presença:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao confirmar presença.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleCancelEvent = (eventId: string) => {
-    const event = mockEvents.find(e => e.id === eventId);
-    setConfirmedEvents(prev => prev.filter(id => id !== eventId));
-    toast({
-      title: "Presença cancelada",
-      description: `Você cancelou sua presença no evento: ${event?.title}`,
-    });
+  const handleCancelEvent = async (eventId: string) => {
+    const event = events.find(e => e.id === eventId);
+    
+    try {
+      const sessionId = getSessionId();
+      const { error } = await supabase
+        .from('event_confirmations')
+        .delete()
+        .eq('event_id', parseInt(eventId))
+        .eq('session_id', sessionId);
+      
+      if (error) throw error;
+      
+      // Atualizar contador de participantes
+      const { error: updateError } = await supabase
+        .from('events')
+        .update({ current_attendees: Math.max(0, event!.currentAttendees - 1) })
+        .eq('id', parseInt(eventId));
+      
+      if (updateError) throw updateError;
+      
+      setConfirmedEvents(prev => prev.filter(id => id !== eventId));
+      
+      // Atualizar lista de eventos
+      setEvents(prev => prev.map(e => 
+        e.id === eventId 
+          ? { ...e, currentAttendees: Math.max(0, e.currentAttendees - 1) }
+          : e
+      ));
+      
+      toast({
+        title: "Presença cancelada",
+        description: `Você cancelou sua presença no evento: ${event?.title}`,
+      });
+    } catch (error) {
+      console.error('Erro ao cancelar presença:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao cancelar presença.",
+        variant: "destructive"
+      });
+    }
   };
 
-  const confirmedEventsList = mockEvents.filter(event => 
+  const confirmedEventsList = events.filter(event => 
     confirmedEvents.includes(event.id)
   );
 
@@ -90,7 +222,7 @@ const Index = () => {
             <TabsTrigger value="all" className="text-xs sm:text-sm px-1.5 sm:px-2 lg:px-4">
               <span className="hidden sm:inline">Todos</span>
               <span className="sm:hidden">Todos</span>
-              <span className="ml-0.5 sm:ml-1">({mockEvents.length})</span>
+              <span className="ml-0.5 sm:ml-1">({events.length})</span>
             </TabsTrigger>
             <TabsTrigger value="confirmed" className="text-xs sm:text-sm px-1.5 sm:px-2 lg:px-4">
               <span className="hidden sm:inline">Meus</span>
@@ -105,17 +237,24 @@ const Index = () => {
               <p className="text-xs sm:text-sm text-muted-foreground">Explore nossa seleção completa de eventos</p>
             </div>
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
-              {mockEvents.map(event => (
-                <EventCard
-                  key={event.id}
-                  event={event}
-                  isConfirmed={confirmedEvents.includes(event.id)}
-                  onConfirm={handleConfirmEvent}
-                  onCancel={handleCancelEvent}
-                />
-              ))}
-            </div>
+            {isLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <span className="ml-2">Carregando eventos...</span>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+                {events.map(event => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    isConfirmed={confirmedEvents.includes(event.id)}
+                    onConfirm={handleConfirmEvent}
+                    onCancel={handleCancelEvent}
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
           
           <TabsContent value="confirmed" className="space-y-4 sm:space-y-6">
