@@ -41,7 +41,7 @@ const AdminImport = () => {
       }
 
       const headers = lines[0].split(',').map(h => h.trim());
-      const requiredHeaders = ['title', 'description', 'date', 'time', 'location', 'maxAttendees'];
+      const requiredHeaders = ['Dia', 'Horário', 'Sessão', 'Tema', 'Código Artigo', 'Artigo', 'Autores', 'EMAIL'];
       
       const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
       if (missingHeaders.length > 0) {
@@ -64,20 +64,26 @@ const AdminImport = () => {
         });
 
         events.push({
-          title: event.title,
-          description: event.description,
-          date: event.date,
-          time: event.time,
-          location: event.location,
-          max_attendees: parseInt(event.maxAttendees) || 50,
+          title: event['Artigo'] || 'Evento sem título',
+          description: event['Autores'] || null,
+          date: event['Dia'],
+          time: event['Horário'],
+          location: event['Sessão'] || 'Local não definido',
+          session_name: event['Sessão'],
+          theme: event['Tema'],
+          article_code: event['Código Artigo'],
+          authors: event['Autores'],
+          contact_email: event['EMAIL'],
+          max_attendees: 50,
           current_attendees: 0,
-          image_url: event.imageUrl || null,
-          price: event.price || null
+          image_url: null,
+          price: null
         });
       }
 
-      // TODO: Implementar integração com Supabase
-      const error = null; // Simulando sucesso por enquanto
+      const { error } = await supabase
+        .from('events')
+        .insert(events);
 
       if (error) {
         console.error('Erro ao inserir eventos:', error);
@@ -173,18 +179,18 @@ const AdminImport = () => {
             <CardContent>
               <div className="bg-muted p-3 lg:p-4 rounded-lg overflow-x-auto">
                 <code className="text-xs sm:text-sm whitespace-nowrap">
-                  title,description,date,time,location,maxAttendees,imageUrl,price
+                  Dia,Horário,Sessão,Tema,Código Artigo,Artigo,Autores,EMAIL
                 </code>
               </div>
               <div className="mt-4 space-y-2 text-xs sm:text-sm text-muted-foreground">
-                <p><strong>title:</strong> Nome do evento</p>
-                <p><strong>description:</strong> Descrição do evento</p>
-                <p><strong>date:</strong> Data no formato YYYY-MM-DD</p>
-                <p><strong>time:</strong> Horário no formato HH:MM</p>
-                <p><strong>location:</strong> Local do evento</p>
-                <p><strong>maxAttendees:</strong> Número máximo de participantes</p>
-                <p><strong>imageUrl:</strong> URL da imagem (opcional)</p>
-                <p><strong>price:</strong> Preço do evento (opcional)</p>
+                <p><strong>Dia:</strong> Data do evento (formato: DD/MM/AAAA ou AAAA-MM-DD)</p>
+                <p><strong>Horário:</strong> Horário no formato HH:MM</p>
+                <p><strong>Sessão:</strong> Nome da sessão ou local do evento</p>
+                <p><strong>Tema:</strong> Tema ou categoria do evento</p>
+                <p><strong>Código Artigo:</strong> Código de referência do artigo</p>
+                <p><strong>Artigo:</strong> Título do artigo/apresentação</p>
+                <p><strong>Autores:</strong> Nomes dos autores</p>
+                <p><strong>EMAIL:</strong> Email de contato (opcional)</p>
               </div>
             </CardContent>
           </Card>

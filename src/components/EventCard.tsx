@@ -13,6 +13,12 @@ export interface Event {
   category: string;
   maxAttendees: number;
   currentAttendees: number;
+  // Novos campos do CSV
+  session_name?: string;
+  theme?: string;
+  article_code?: string;
+  authors?: string;
+  contact_email?: string;
 }
 
 interface EventCardProps {
@@ -51,15 +57,15 @@ export const EventCard = ({ event, isConfirmed, onConfirm, onCancel }: EventCard
           <CardTitle className="text-base sm:text-lg font-semibold text-foreground line-clamp-2 leading-tight">
             {event.title}
           </CardTitle>
-          <Badge className={`${getCategoryColor(event.category)} border text-xs shrink-0`}>
-            {event.category}
+          <Badge className={`${getCategoryColor(event.theme || event.category)} border text-xs shrink-0`}>
+            {event.theme || event.category}
           </Badge>
         </div>
       </CardHeader>
       
       <CardContent className="space-y-3 sm:space-y-4 px-4 sm:px-6">
         <p className="text-muted-foreground text-xs sm:text-sm line-clamp-2 leading-relaxed">
-          {event.description}
+          {event.authors || event.description}
         </p>
         
         <div className="space-y-1.5 sm:space-y-2">
@@ -75,13 +81,20 @@ export const EventCard = ({ event, isConfirmed, onConfirm, onCancel }: EventCard
           
           <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
-            <span className="line-clamp-1 min-w-0">{event.location}</span>
+            <span className="line-clamp-1 min-w-0">{event.session_name || event.location}</span>
           </div>
           
           <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
             <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary shrink-0" />
             <span className="truncate">{event.currentAttendees}/{event.maxAttendees} participantes</span>
           </div>
+          
+          {event.article_code && (
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <span className="text-primary">📄</span>
+              <span className="truncate font-mono">{event.article_code}</span>
+            </div>
+          )}
         </div>
         
         <div className="pt-1 sm:pt-2">
